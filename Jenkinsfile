@@ -33,7 +33,7 @@ spec:
                             "MAVEN_CONFIG=/home/jenkins/.m2",
                             "MAVEN_OPTS=-Dmaven.repo.local=${localRepo}"
                         ]) {
-                            git branch: 'main', url: 'https://gitlab.com/kylecanonigo-group/kylecanonigo-project.git'
+                            git branch: 'main', url: 'https://github.com/kuldeepsingh99/openshift-jenkins-cicd.git'
                             def pom = readMavenPom file: 'pom.xml'
                             version = pom.version
                             sh "mvn install -Dmaven.repo.local=${localRepo}"
@@ -57,7 +57,7 @@ spec:
                 script {
                     openshift.withCluster() {
                         openshift.withProject() {
-                            // Use a known existing image stream and tag:
+                            // Changed here to a valid image stream
                             openshift.newBuild("--name=sample-app-jenkins-new", "--image-stream=openjdk-11-rhel7:latest", "--binary=true")
                         }
                     }
