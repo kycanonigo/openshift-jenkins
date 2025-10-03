@@ -37,8 +37,11 @@ spec:
                             git branch: 'main', url: 'https://gitlab.com/kylecanonigo-group/kylecanonigo-project.git'
                             def pom = readMavenPom file: 'pom.xml'
                             version = pom.version
-                            sh "mvn install -Dmaven.repo.local=${localRepo}"
+                            sh "mvn clean install -Dmaven.repo.local=${localRepo}"
                         }
+
+                        // Stash the target folder for later stages
+                        stash name: 'built-jar', includes: 'target/*.jar'
                     }
                 }
             }
@@ -63,7 +66,6 @@ spec:
                                 isSelector.delete()
                             }
 
-                            echo "Waiting for BuildConfig and ImageStream to be deleted..."
                             timeout(time: 30, unit: 'SECONDS') {
                                 waitUntil {
                                     return !openshift.selector("bc", bcName).exists() &&
@@ -86,10 +88,16 @@ spec:
         stage('Build Image') {
             steps {
                 script {
-                    sh "rm -rf ocp && mkdir -p ocp/deployments"
-                    sh "ls -la target"
-                    sh "cp target/openshiftjenkins-0.0.1-SNAPSHOT.jar ocp/deployments"
+                    // Unstash the built JAR
+                    unstash 'built-jar'
 
+                    // Ensure directory structure
+                    sh "rm -rf ocp && mkdir -p ocp/deployments"
+
+                    // Copy the jar to deployments folder
+                    sh "cp target/*.jar ocp/deployments"
+
+                    // Start OpenShift build
                     openshift.withCluster() {
                         openshift.withProject() {
                             openshift.selector("bc", "sample-app-jenkins-new")
