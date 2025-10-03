@@ -44,7 +44,6 @@ spec:
         }
 
         stage('Create Image Builder') {
-            agent any
             when {
                 expression {
                     openshift.withCluster() {
@@ -67,7 +66,6 @@ spec:
         }
 
         stage('Build Image') {
-            agent any
             steps {
                 sh "rm -rf ocp && mkdir -p ocp/deployments"
                 sh "pwd && ls -la target "
@@ -84,7 +82,6 @@ spec:
         }
 
         stage('deploy') {
-            agent any
             when {
                 expression {
                     openshift.withCluster() {
