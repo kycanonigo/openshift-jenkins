@@ -17,17 +17,25 @@ spec:
       command:
         - cat
       tty: true
+      volumeMounts:
+        - name: maven-cache
+          mountPath: /home/jenkins/.m2
+  volumes:
+    - name: maven-cache
+      emptyDir: {}
 """
                 }
             }
             steps {
                 container('maven') {
-                    git branch: 'main', url: 'https://gitlab.com/kylecanonigo-group/kylecanonigo-project.git'
-                    script {
-                        def pom = readMavenPom file: 'pom.xml'
-                        version = pom.version
+                    withEnv(["MAVEN_CONFIG=/home/jenkins/.m2"]) {
+                        git branch: 'main', url: 'https://gitlab.com/kylecanonigo-group/kylecanonigo-project.git'
+                        script {
+                            def pom = readMavenPom file: 'pom.xml'
+                            version = pom.version
+                        }
+                        sh "mvn install"
                     }
-                    sh "mvn install"
                 }
             }
         }
