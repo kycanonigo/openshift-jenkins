@@ -27,13 +27,17 @@ spec:
             }
             steps {
                 container('maven') {
-                    withEnv(["MAVEN_CONFIG=/home/jenkins/.m2"]) {
-                        git branch: 'main', url: 'https://gitlab.com/kylecanonigo-group/kylecanonigo-project.git'
-                        script {
+                    script {
+                        def localRepo = "/home/jenkins/.m2/repository"
+                        withEnv([
+                            "MAVEN_CONFIG=/home/jenkins/.m2",
+                            "MAVEN_OPTS=-Dmaven.repo.local=${localRepo}"
+                        ]) {
+                            git branch: 'main', url: 'https://gitlab.com/kylecanonigo-group/kylecanonigo-project.git'
                             def pom = readMavenPom file: 'pom.xml'
                             version = pom.version
+                            sh "mvn install -Dmaven.repo.local=${localRepo}"
                         }
-                        sh "mvn install"
                     }
                 }
             }
