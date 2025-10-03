@@ -57,8 +57,8 @@ spec:
                 script {
                     openshift.withCluster() {
                         openshift.withProject() {
-                            // Changed here to a valid image stream
-                            openshift.newBuild("--name=sample-app-jenkins-new", "--image-stream=openjdk-11-rhel7:latest", "--binary=true")
+                            // Use existing tag instead of :latest
+                            openshift.newBuild("--name=sample-app-jenkins-new", "--image-stream=openjdk-11-rhel7:1.14", "--binary=true")
                         }
                     }
                 }
