@@ -49,26 +49,35 @@ spec:
                     openshift.withCluster() {
                         openshift.withProject() {
                             def bcSelector = openshift.selector("bc", "sample-app-jenkins-new")
+                            def isSelector = openshift.selector("is", "sample-app-jenkins-new")
+
                             if (bcSelector.exists()) {
                                 echo "BuildConfig 'sample-app-jenkins-new' exists. Deleting it first..."
                                 bcSelector.delete()
-                                // Optional: wait for deletion to complete
-                                timeout(time: 30, unit: 'SECONDS') {
-                                    waitUntil {
-                                        return !openshift.selector("bc", "sample-app-jenkins-new").exists()
-                                    }
-                                }
-                            } else {
-                                echo "BuildConfig 'sample-app-jenkins-new' does not exist. Proceeding to create."
                             }
 
-                            // Create the new BuildConfig
+                            if (isSelector.exists()) {
+                                echo "ImageStream 'sample-app-jenkins-new' exists. Deleting it first..."
+                                isSelector.delete()
+                            }
+
+                            // Wait for deletion to complete
+                            timeout(time: 30, unit: 'SECONDS') {
+                                waitUntil {
+                                    def bcGone = !openshift.selector("bc", "sample-app-jenkins-new").exists()
+                                    def isGone = !openshift.selector("is", "sample-app-jenkins-new").exists()
+                                    return bcGone && isGone
+                                }
+                            }
+
+                            echo "Creating new BuildConfig 'sample-app-jenkins-new'..."
                             openshift.newBuild("--name=sample-app-jenkins-new", "--image-stream=openjdk-11-rhel7:1.14", "--binary=true")
                         }
                     }
                 }
             }
         }
+
 
         stage('Build Image') {
             steps {
