@@ -44,6 +44,7 @@ spec:
         }
 
         stage('Create Image Builder') {
+            agent any
             when {
                 expression {
                     openshift.withCluster() {
@@ -57,7 +58,6 @@ spec:
                 script {
                     openshift.withCluster() {
                         openshift.withProject() {
-                            // Use existing tag instead of :latest
                             openshift.newBuild("--name=sample-app-jenkins-new", "--image-stream=openjdk-11-rhel7:1.14", "--binary=true")
                         }
                     }
@@ -66,6 +66,7 @@ spec:
         }
 
         stage('Build Image') {
+            agent any
             steps {
                 sh "rm -rf ocp && mkdir -p ocp/deployments"
                 sh "pwd && ls -la target "
@@ -82,6 +83,7 @@ spec:
         }
 
         stage('deploy') {
+            agent any
             when {
                 expression {
                     openshift.withCluster() {
