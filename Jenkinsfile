@@ -44,20 +44,25 @@ spec:
         }
 
         stage('Create Image Builder') {
-            when {
-                expression {
-                    openshift.withCluster() {
-                        openshift.withProject() {
-                            return !openshift.selector("bc", "sample-app-jenkins-new").exists();
-                        }
-                    }
-                }
-            }
             steps {
                 script {
                     openshift.withCluster() {
                         openshift.withProject() {
-                            // Use existing tag instead of :latest
+                            def bcSelector = openshift.selector("bc", "sample-app-jenkins-new")
+                            if (bcSelector.exists()) {
+                                echo "BuildConfig 'sample-app-jenkins-new' exists. Deleting it first..."
+                                bcSelector.delete()
+                                // Optional: wait for deletion to complete
+                                timeout(time: 30, unit: 'SECONDS') {
+                                    waitUntil {
+                                        return !openshift.selector("bc", "sample-app-jenkins-new").exists()
+                                    }
+                                }
+                            } else {
+                                echo "BuildConfig 'sample-app-jenkins-new' does not exist. Proceeding to create."
+                            }
+
+                            // Create the new BuildConfig
                             openshift.newBuild("--name=sample-app-jenkins-new", "--image-stream=openjdk-11-rhel7:1.14", "--binary=true")
                         }
                     }
