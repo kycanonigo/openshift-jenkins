@@ -5,24 +5,23 @@ pipeline {
         stage('Build App') {
             agent {
                 kubernetes {
-                    label 'maven-agent'
                     defaultContainer 'maven'
                     yaml """
 apiVersion: v1
 kind: Pod
 spec:
   containers:
-    - name: maven
-      image: maven:3.8.6-openjdk-18
-      command:
-        - cat
-      tty: true
-      volumeMounts:
-        - name: maven-cache
-          mountPath: /home/jenkins/.m2
+  - name: maven
+    image: maven:3.8.6-openjdk-18
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - mountPath: /home/jenkins/.m2
+      name: maven-cache
   volumes:
-    - name: maven-cache
-      emptyDir: {}
+  - name: maven-cache
+    emptyDir: {}
 """
                 }
             }
