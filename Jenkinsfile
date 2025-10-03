@@ -58,6 +58,7 @@ spec:
                 script {
                     openshift.withCluster() {
                         openshift.withProject() {
+                            // Use existing tag instead of :latest
                             openshift.newBuild("--name=sample-app-jenkins-new", "--image-stream=openjdk-11-rhel7:1.14", "--binary=true")
                         }
                     }
