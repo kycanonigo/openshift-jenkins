@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
 	@GetMapping("/")
-    public String root() {
-        return "App is running!";
-    }
-
+	public String root() {
+		return "App is running!";
+	}
+	
 	@GetMapping("/hello")
 	public String ping() {
 		return "Openshift Pipe Line Testing";
