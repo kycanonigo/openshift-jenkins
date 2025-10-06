@@ -8,11 +8,11 @@ public class TestController {
 
 	@GetMapping("/")
 	public String root() {
-		return "ROOT - AKO SI JOHN BRYAN";
+		return "Hello. JB here.";
 	}
 	
 	@GetMapping("/hello")
 	public String ping() {
-		return "HELLO - AKO SI KYLE CANONIGO";
+		return "Hello. Kyle here";
 	}
 }
