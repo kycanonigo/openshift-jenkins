@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        JIRA_BASE_URL = 'https://yourdomain.atlassian.net'       // 🔁 Replace with your Jira URL
+        JIRA_PROJECT_KEY = 'CICD'                                // 🔁 Replace with your Jira project key
+        JIRA_CREDENTIALS_ID = 'jira-api-token'                  // 🔁 Jenkins credentials ID with Jira API token
+    }
+
     stages {
 
         stage('Build App') {
@@ -40,7 +46,6 @@ spec:
                             sh "mvn clean install -Dmaven.repo.local=${localRepo}"
                         }
 
-                        // Stash the target folder for later stages
                         stash name: 'built-jar', includes: 'target/*.jar'
                     }
                 }
@@ -88,16 +93,11 @@ spec:
         stage('Build Image') {
             steps {
                 script {
-                    // Unstash the built JAR
                     unstash 'built-jar'
 
-                    // Ensure directory structure
                     sh "rm -rf ocp && mkdir -p ocp/deployments"
-
-                    // Copy the jar to deployments folder
                     sh "cp target/*.jar ocp/deployments"
 
-                    // Start OpenShift build
                     openshift.withCluster() {
                         openshift.withProject() {
                             openshift.selector("bc", "sample-app-jenkins-new")
@@ -127,6 +127,48 @@ spec:
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // ⛑️ FAILURE HANDLING TO CREATE JIRA ISSUE
+    post {
+        failure {
+            script {
+                def jobName = env.JOB_NAME
+                def buildNumber = env.BUILD_NUMBER
+                def buildUrl = env.BUILD_URL
+                def summary = "CI/CD Pipeline Failed: ${jobName} #${buildNumber}"
+                def description = """\
+*Pipeline Failed*
+
+Job: ${jobName}  
+Build: [#${buildNumber}](${buildUrl})  
+Timestamp: ${new Date().format("yyyy-MM-dd HH:mm:ss")}  
+Node: ${env.NODE_NAME}
+
+Please investigate the failure.
+"""
+
+                def payload = """{
+                  "fields": {
+                    "project": {
+                      "key": "${env.JIRA_PROJECT_KEY}"
+                    },
+                    "summary": "${summary}",
+                    "description": "${description}",
+                    "issuetype": {
+                      "name": "Bug"
+                    }
+                  }
+                }"""
+
+                httpRequest authentication: env.JIRA_CREDENTIALS_ID,
+                            httpMode: 'POST',
+                            contentType: 'APPLICATION_JSON',
+                            requestBody: payload,
+                            url: "${env.JIRA_BASE_URL}/rest/api/3/issue",
+                            validResponseCodes: '201'
             }
         }
     }
