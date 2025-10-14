@@ -40,7 +40,7 @@ spec:
                             "MAVEN_CONFIG=/home/jenkins/.m2",
                             "MAVEN_OPTS=-Dmaven.repo.local=${localRepo}"
                         ]) {
-                            git branch: 'main', url: 'https://gitlab.com/kylecanonigo-group/kylecanonigo-project.git'
+                            git branch: 'main', url: 'https://github.com/jbramon/kylecanonigo-project.git'
                             def pom = readMavenPom file: 'pom.xml'
                             version = pom.version
                             sh "mvn clean install -Dmaven.repo.local=${localRepo}"
