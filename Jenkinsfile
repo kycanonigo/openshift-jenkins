@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        JIRA_BASE_URL = 'https://yourdomain.atlassian.net'       // 🔁 Replace with your Jira URL
-        JIRA_PROJECT_KEY = 'CICD'                                // 🔁 Replace with your Jira project key
+        JIRA_BASE_URL = 'https://ramonbryan2001.atlassian.net'       // 🔁 Replace with your Jira URL
+        JIRA_PROJECT_KEY = 'KAN'                                // 🔁 Replace with your Jira project key
         JIRA_CREDENTIALS_ID = 'jira-api-token'                  // 🔁 Jenkins credentials ID with Jira API token
     }
 
